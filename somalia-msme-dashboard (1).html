@@ -1,0 +1,1729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Somalia MSME Disaster Preparedness Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f4f0;
+  --surface: #ffffff;
+  --surface2: #f0efe9;
+  --border: #dddbd3;
+  --border-strong: #b8b5aa;
+  --text: #1a1917;
+  --text-2: #5a5750;
+  --text-3: #9a9690;
+  --accent: #1a3a5c;
+  --accent-light: #e8eef5;
+  --low: #2d6a4f;
+  --low-bg: #d8f3dc;
+  --mod: #b5600a;
+  --mod-bg: #fff0d6;
+  --high: #c0392b;
+  --high-bg: #fde8e6;
+  --severe: #7b0f24;
+  --severe-bg: #f5d0d8;
+  --agri: #2d6a4f;
+  --live: #8b4513;
+  --fish: #1a5276;
+  --text-sector: #5b2c6f;
+  --font: 'IBM Plex Sans', sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+  --r: 6px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 220px;
+  min-width: 220px;
+  background: var(--accent);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 100;
+}
+.sidebar-brand {
+  padding: 20px 18px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.sidebar-brand .flag {
+  font-size: 20px;
+  margin-bottom: 6px;
+  display: block;
+}
+.sidebar-brand h1 {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #fff;
+  letter-spacing: 0.01em;
+}
+.sidebar-brand p {
+  font-size: 11px;
+  color: rgba(255,255,255,0.55);
+  margin-top: 3px;
+}
+.sidebar-nav {
+  flex: 1;
+  padding: 12px 0;
+  overflow-y: auto;
+}
+.nav-section {
+  padding: 10px 18px 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.35);
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 18px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+  cursor: pointer;
+  transition: all 0.15s;
+  border-left: 3px solid transparent;
+  line-height: 1.3;
+}
+.nav-item:hover { background: rgba(255,255,255,0.07); color: #fff; }
+.nav-item.active {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  border-left-color: #7eb8e8;
+}
+.nav-icon { font-size: 16px; opacity: 0.8; min-width: 18px; }
+.sidebar-footer {
+  padding: 14px 18px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  font-size: 11px;
+  color: rgba(255,255,255,0.35);
+}
+
+/* ── MAIN ── */
+.main {
+  margin-left: 220px;
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky; top: 0; z-index: 50;
+}
+.topbar-title { font-size: 16px; font-weight: 600; color: var(--text); }
+.topbar-sub { font-size: 12px; color: var(--text-3); margin-top: 1px; }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.badge-update {
+  background: var(--low-bg);
+  color: var(--low);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid #b7e4c7;
+}
+
+.page-content {
+  padding: 28px;
+  flex: 1;
+}
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── REUSABLE: RISK BAND ── */
+.risk-band {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.risk-low { background: var(--low-bg); color: var(--low); }
+.risk-moderate { background: var(--mod-bg); color: var(--mod); }
+.risk-high { background: var(--high-bg); color: var(--high); }
+.risk-severe { background: var(--severe-bg); color: var(--severe); }
+
+/* ── REUSABLE: SCORE GAUGE ── */
+.gauge-wrap { text-align: center; }
+.gauge-svg { display: block; margin: 0 auto; }
+.gauge-score { font-size: 28px; font-weight: 600; font-family: var(--mono); }
+.gauge-label { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+
+/* ── REUSABLE: CARD ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 18px;
+  box-shadow: var(--shadow);
+}
+.card-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+  margin-bottom: 12px;
+}
+.card-value { font-size: 28px; font-weight: 600; font-family: var(--mono); color: var(--text); }
+.card-sub { font-size: 12px; color: var(--text-3); margin-top: 3px; }
+
+/* ── GRID LAYOUTS ── */
+.grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-title span { color: var(--text-3); font-weight: 400; font-size: 12px; }
+.mt16 { margin-top: 16px; }
+.mt24 { margin-top: 24px; }
+
+/* ── TABLE ── */
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-3);
+  padding: 8px 12px;
+  border-bottom: 2px solid var(--border);
+  background: var(--surface2);
+}
+.data-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: var(--surface2); }
+.data-table td .region-name { font-weight: 500; }
+.score-bar-wrap { display: flex; align-items: center; gap: 8px; }
+.score-bar-bg { height: 6px; border-radius: 3px; background: var(--border); flex: 1; }
+.score-bar-fill { height: 6px; border-radius: 3px; }
+.score-num { font-family: var(--mono); font-size: 12px; font-weight: 500; min-width: 28px; text-align: right; }
+
+/* ── SECTOR TABS ── */
+.sector-tabs { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
+.sector-tab {
+  padding: 7px 16px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text-2);
+  transition: all 0.15s;
+}
+.sector-tab:hover { border-color: var(--accent); color: var(--accent); }
+.sector-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+/* ── PROGRESS BAR COMPONENT ── */
+.prog-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.prog-label { font-size: 12px; color: var(--text-2); min-width: 120px; }
+.prog-bg { flex: 1; height: 8px; background: var(--border); border-radius: 4px; }
+.prog-fill { height: 8px; border-radius: 4px; transition: width 0.4s; }
+.prog-val { font-family: var(--mono); font-size: 12px; color: var(--text); min-width: 30px; text-align: right; }
+
+/* ── FORM ── */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-label { font-size: 12px; font-weight: 500; color: var(--text-2); }
+.form-label .req { color: var(--high); }
+.form-input, .form-select {
+  padding: 9px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r);
+  font-family: var(--font);
+  font-size: 13px;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.form-input:focus, .form-select:focus { border-color: var(--accent); }
+.form-help { font-size: 11px; color: var(--text-3); }
+.form-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-3);
+  padding: 14px 0 6px;
+  border-top: 1px solid var(--border);
+  grid-column: 1 / -1;
+  margin-top: 4px;
+}
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--r);
+  padding: 10px 24px;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.btn-primary:hover { opacity: 0.88; }
+.btn-secondary {
+  background: var(--surface);
+  color: var(--text-2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r);
+  padding: 10px 20px;
+  font-family: var(--font);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* ── RESULT PANEL ── */
+.result-panel { display: none; }
+.result-panel.visible { display: block; }
+.result-header {
+  background: var(--accent);
+  color: #fff;
+  border-radius: var(--r) var(--r) 0 0;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.result-body { background: var(--surface); border: 1px solid var(--border); border-top: none; border-radius: 0 0 var(--r) var(--r); padding: 24px; }
+.driver-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.driver-item:last-child { border-bottom: none; }
+.driver-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+.action-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--accent-light);
+  border-radius: var(--r);
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+.action-num {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── CORRIDOR ── */
+.corridor-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  margin-bottom: 12px;
+}
+.corridor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+.corridor-title { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.corridor-body { padding: 16px 18px; }
+.route-point { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-2); padding: 3px 0; }
+.route-arrow { color: var(--text-3); font-size: 10px; }
+
+/* ── ALERT BOX ── */
+.alert {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--r);
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+.alert-high { background: var(--high-bg); color: var(--high); border: 1px solid #f5b7b1; }
+.alert-mod { background: var(--mod-bg); color: var(--mod); border: 1px solid #f8c471; }
+.alert-low { background: var(--low-bg); color: var(--low); border: 1px solid #a9dfbf; }
+
+/* ── METHODOLOGY ── */
+.meth-section { margin-bottom: 28px; }
+.meth-section h3 { font-size: 14px; font-weight: 600; margin-bottom: 10px; color: var(--text); }
+.meth-section p { font-size: 13px; color: var(--text-2); line-height: 1.7; margin-bottom: 8px; }
+.formula-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 14px 18px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--accent);
+  margin: 10px 0;
+}
+.ref-item { padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text-2); }
+.ref-item:last-child { border-bottom: none; }
+
+/* ── SOMALIA MAP (SVG) ── */
+.map-wrap { position: relative; }
+.map-legend { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-2); }
+.legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+/* ── HOME HERO ── */
+.hero-banner {
+  background: var(--accent);
+  color: #fff;
+  border-radius: var(--r);
+  padding: 28px 32px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.hero-banner h2 { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+.hero-banner p { font-size: 13px; opacity: 0.75; max-width: 520px; line-height: 1.6; }
+.hero-stat { text-align: center; }
+.hero-stat .num { font-size: 32px; font-weight: 600; font-family: var(--mono); }
+.hero-stat .lbl { font-size: 11px; opacity: 0.6; margin-top: 2px; }
+
+.quick-action-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+.quick-action {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+}
+.quick-action:hover { border-color: var(--accent); box-shadow: 0 2px 8px rgba(26,58,92,0.1); }
+.qa-icon { font-size: 22px; margin-bottom: 8px; }
+.qa-title { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+.qa-desc { font-size: 12px; color: var(--text-3); }
+
+.info-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 20px; padding: 4px 10px;
+  font-size: 11px; color: var(--text-2);
+}
+
+/* mini chart bars */
+.mini-bars { display: flex; align-items: flex-end; gap: 3px; height: 40px; }
+.mini-bar { width: 18px; border-radius: 2px 2px 0 0; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <span class="flag">🇸🇴</span>
+    <h1>Somalia MSME<br>Disaster Preparedness</h1>
+    <p>Risk Intelligence Platform</p>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section">Overview</div>
+    <div class="nav-item active" data-page="home">
+      <span class="nav-icon">⌂</span> Home
+    </div>
+    <div class="nav-section">Analysis</div>
+    <div class="nav-item" data-page="national">
+      <span class="nav-icon">◎</span> National Risk Dashboard
+    </div>
+    <div class="nav-item" data-page="sector">
+      <span class="nav-icon">⊞</span> Sector Risk Explorer
+    </div>
+    <div class="nav-item" data-page="corridor">
+      <span class="nav-icon">↗</span> Corridor &amp; Supply Routes
+    </div>
+    <div class="nav-section">Tools</div>
+    <div class="nav-item" data-page="assessment">
+      <span class="nav-icon">✓</span> MSME Self-Assessment
+    </div>
+    <div class="nav-section">Reference</div>
+    <div class="nav-item" data-page="methodology">
+      <span class="nav-icon">≡</span> Methodology
+    </div>
+  </div>
+  <div class="sidebar-footer">
+    Data: OCHA, FSNAU, ACLED<br>
+    Updated: June 2025
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="topbar-title">Home</div>
+      <div class="topbar-sub" id="topbar-sub">Somalia MSME Disaster Preparedness Platform</div>
+    </div>
+    <div class="topbar-right">
+      <span class="info-chip">🕐 Data: Jun 2025</span>
+      <span class="badge-update">● Live indicators</span>
+    </div>
+  </div>
+
+  <div class="page-content">
+
+    <!-- ════════════════════════════════════════
+         PAGE 1: HOME
+    ════════════════════════════════════════ -->
+    <div class="page active" id="page-home">
+      <div class="hero-banner">
+        <div>
+          <h2>Somalia MSME Disaster Preparedness</h2>
+          <p>Risk intelligence for micro, small and medium enterprises across agriculture, livestock, fisheries, and textiles sectors. Navigate to any module to explore national risk levels, sector-specific vulnerabilities, or complete your business self-assessment.</p>
+        </div>
+        <div style="display:flex; gap:32px; flex-shrink:0; margin-left:32px;">
+          <div class="hero-stat">
+            <div class="num">18</div>
+            <div class="lbl">Regions tracked</div>
+          </div>
+          <div class="hero-stat">
+            <div class="num">4</div>
+            <div class="lbl">Sectors covered</div>
+          </div>
+          <div class="hero-stat">
+            <div class="num">12</div>
+            <div class="lbl">Supply corridors</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">Current risk snapshot <span>Somalia-wide, all sectors</span></div>
+      <div class="grid-4" style="margin-bottom:20px;">
+        <div class="card">
+          <div class="card-title">National avg. risk</div>
+          <div class="card-value" style="color:var(--high);">61</div>
+          <div class="card-sub"><span class="risk-band risk-high">High</span></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Regions at severe risk</div>
+          <div class="card-value" style="color:var(--severe);">4</div>
+          <div class="card-sub">Bay, Bakool, Lower Shabelle, Middle Juba</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Most exposed sector</div>
+          <div class="card-value" style="color:var(--fish); font-size:18px;">Fisheries</div>
+          <div class="card-sub">Avg. adjusted score: 72 · multiplier ×1.4</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Active alerts</div>
+          <div class="card-value" style="color:var(--mod);">7</div>
+          <div class="card-sub">Drought · Flooding · Access disruption</div>
+        </div>
+      </div>
+
+      <div class="section-title">Quick access</div>
+      <div class="quick-action-grid">
+        <div class="quick-action" onclick="navigate('national')">
+          <div class="qa-icon">🗺</div>
+          <div class="qa-title">National Risk Dashboard</div>
+          <div class="qa-desc">View all 18 regions with composite risk scores and breakdown by hazard type.</div>
+        </div>
+        <div class="quick-action" onclick="navigate('sector')">
+          <div class="qa-icon">🌾</div>
+          <div class="qa-title">Sector Risk Explorer</div>
+          <div class="qa-desc">Compare agriculture, livestock, fisheries and textiles risk profiles side by side.</div>
+        </div>
+        <div class="quick-action" onclick="navigate('corridor')">
+          <div class="qa-icon">🛣</div>
+          <div class="qa-title">Corridor &amp; Route Risk</div>
+          <div class="qa-desc">Assess trade corridors and supply chain disruption risk for your route.</div>
+        </div>
+        <div class="quick-action" onclick="navigate('assessment')">
+          <div class="qa-icon">📋</div>
+          <div class="qa-title">Business Self-Assessment</div>
+          <div class="qa-desc">Answer 9 questions to get your personalised risk score and action plan.</div>
+        </div>
+        <div class="quick-action" onclick="navigate('methodology')">
+          <div class="qa-icon">📐</div>
+          <div class="qa-title">Methodology</div>
+          <div class="qa-desc">Understand how scores are calculated, data sources, and scoring logic.</div>
+        </div>
+        <div class="quick-action" style="background:var(--accent-light); border-color:#bcd4ea;">
+          <div class="qa-icon">ℹ</div>
+          <div class="qa-title">About this tool</div>
+          <div class="qa-desc">Built for Somalia MSMEs. Data from OCHA, ACLED, FSNAU, World Bank Somalia.</div>
+        </div>
+      </div>
+
+      <div class="mt24">
+        <div class="section-title">Context: why disaster preparedness matters for Somalia MSMEs</div>
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-title">Climate hazards</div>
+            <p style="font-size:13px; color:var(--text-2); line-height:1.6;">Somalia experiences recurring drought-flood cycles (La Niña/El Niño driven). The 2022–2023 drought was the worst in 40 years, destroying crops and livestock. Coastal flooding affects fishing communities seasonally.</p>
+          </div>
+          <div class="card">
+            <div class="card-title">Conflict and access</div>
+            <p style="font-size:13px; color:var(--text-2); line-height:1.6;">Al-Shabaab controls or contests significant territory across south-central Somalia, disrupting supply chains, restricting market access, and creating unpredictable operating environments for MSMEs.</p>
+          </div>
+          <div class="card">
+            <div class="card-title">Business vulnerability</div>
+            <p style="font-size:13px; color:var(--text-2); line-height:1.6;">Most Somali MSMEs operate with thin cash reserves, limited insurance access, informal record-keeping, and heavy reliance on a small number of suppliers — making them highly vulnerable to shocks.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         PAGE 2: NATIONAL RISK DASHBOARD
+    ════════════════════════════════════════ -->
+    <div class="page" id="page-national">
+      <div class="grid-4" style="margin-bottom:20px;">
+        <div class="card">
+          <div class="card-title">National avg (equal weight)</div>
+          <div class="card-value" style="color:var(--high);">58</div>
+          <div class="card-sub"><span class="risk-band risk-high">High</span></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Regions — severe</div>
+          <div class="card-value" style="color:var(--severe);">4</div>
+          <div class="card-sub">Score ≥ 75</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Regions — high</div>
+          <div class="card-value" style="color:var(--high);">7</div>
+          <div class="card-sub">Score 50–74</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Regions — moderate/low</div>
+          <div class="card-value" style="color:var(--mod);">7</div>
+          <div class="card-sub">Score &lt; 50</div>
+        </div>
+      </div>
+
+      <div class="alert alert-high">
+        <span>⚠</span>
+        <span><strong>Active hazard alerts:</strong> Drought (IPC Phase 3–4) in Bay, Bakool, and Hiraan. Flash flood risk elevated in Lower Jubba, Gedo. Al-Shabaab-linked access restrictions on Mogadishu–Baidoa axis (June 2025).</span>
+      </div>
+
+      <div class="section-title" style="margin-top:4px;">All regions — equal-weight composite risk scores</div>
+      <div class="card" style="padding:0; overflow:hidden;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Region</th>
+              <th>Climate Risk</th>
+              <th>Conflict &amp; Access</th>
+              <th>Business Vuln.</th>
+              <th>Preparedness Gap</th>
+              <th>Equal-Weight Score</th>
+              <th>Risk Band</th>
+            </tr>
+          </thead>
+          <tbody id="national-table-body"></tbody>
+        </table>
+      </div>
+
+      <div class="grid-2 mt24">
+        <div class="card">
+          <div class="card-title">Score distribution</div>
+          <div id="national-dist-bars" style="margin-top:8px;"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Top 5 highest-risk regions</div>
+          <div id="top5-regions" style="margin-top:8px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         PAGE 3: SECTOR RISK EXPLORER
+    ════════════════════════════════════════ -->
+    <div class="page" id="page-sector">
+      <div class="grid-4" style="margin-bottom:20px;" id="sector-summary-cards"></div>
+
+      <div class="sector-tabs" id="sector-tabs">
+        <div class="sector-tab active" data-sector="agriculture">🌾 Agriculture ×1.2</div>
+        <div class="sector-tab" data-sector="livestock">🐄 Livestock ×1.3</div>
+        <div class="sector-tab" data-sector="fisheries">🐟 Fisheries ×1.4</div>
+        <div class="sector-tab" data-sector="textiles">🧵 Textiles ×1.1</div>
+      </div>
+
+      <div id="sector-detail-panel">
+        <div class="grid-2-1">
+          <div>
+            <div class="section-title" id="sector-detail-title">Agriculture — Regional Risk Scores</div>
+            <div class="card" style="padding:0; overflow:hidden;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Region</th>
+                    <th>Equal-Weight Score</th>
+                    <th>Sector-Adjusted Score</th>
+                    <th>Risk Band</th>
+                    <th>Key Driver</th>
+                  </tr>
+                </thead>
+                <tbody id="sector-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <div class="section-title">Sector profile</div>
+            <div class="card" id="sector-profile-card">
+              <div id="sector-profile-content"></div>
+            </div>
+            <div class="card mt16" id="sector-risk-factors-card">
+              <div class="card-title">Risk factor breakdown</div>
+              <div id="sector-risk-factors"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         PAGE 4: CORRIDOR & SUPPLY ROUTE RISK
+    ════════════════════════════════════════ -->
+    <div class="page" id="page-corridor">
+      <div class="grid-4" style="margin-bottom:20px;">
+        <div class="card">
+          <div class="card-title">Corridors tracked</div>
+          <div class="card-value">12</div>
+          <div class="card-sub">Cross-regional trade routes</div>
+        </div>
+        <div class="card">
+          <div class="card-title">High-risk corridors</div>
+          <div class="card-value" style="color:var(--high);">5</div>
+          <div class="card-sub">Score ≥ 50</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Severe disruption risk</div>
+          <div class="card-value" style="color:var(--severe);">2</div>
+          <div class="card-sub">Score ≥ 75</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Main hazard type</div>
+          <div class="card-value" style="font-size:16px; color:var(--high);">Conflict access</div>
+          <div class="card-sub">7 of 12 corridors affected</div>
+        </div>
+      </div>
+
+      <div class="alert alert-mod">
+        <span>⚡</span>
+        <span><strong>Note on corridor data:</strong> Conflict-access ratings drawn from ACLED event data (2024–25). Flood/road damage ratings from UN OCHA Somalia situation reports. Corridor risk = average of access restriction, flood exposure, and chokepoint vulnerability.</span>
+      </div>
+
+      <div class="section-title" style="margin-top:4px;">Supply corridors <span>Click a corridor to expand details</span></div>
+      <div id="corridor-list"></div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         PAGE 5: MSME SELF-ASSESSMENT
+    ════════════════════════════════════════ -->
+    <div class="page" id="page-assessment">
+      <div class="grid-2-1">
+        <div>
+          <div class="section-title">Business risk self-assessment</div>
+          <div class="card">
+            <p style="font-size:13px; color:var(--text-2); margin-bottom:18px; line-height:1.6;">Answer these 9 questions honestly about your business. Your score is calculated using the equal-weight and sector-adjusted scoring model described in the Methodology page.</p>
+            <div class="form-grid" id="assessment-form">
+
+              <div class="form-group">
+                <label class="form-label">Region <span class="req">*</span></label>
+                <select class="form-select" id="f-region">
+                  <option value="">Select region…</option>
+                  <option>Awdal</option><option>Woqooyi Galbeed</option><option>Togdheer</option>
+                  <option>Sanaag</option><option>Sool</option><option>Nugaal</option>
+                  <option>Mudug</option><option>Galgaduud</option><option>Hiraan</option>
+                  <option>Middle Shabelle</option><option>Benadir (Mogadishu)</option>
+                  <option>Lower Shabelle</option><option>Bay</option><option>Bakool</option>
+                  <option>Gedo</option><option>Middle Juba</option><option>Lower Juba</option>
+                  <option>Bari</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Sector <span class="req">*</span></label>
+                <select class="form-select" id="f-sector">
+                  <option value="">Select sector…</option>
+                  <option value="agriculture">Agriculture</option>
+                  <option value="livestock">Livestock</option>
+                  <option value="fisheries">Fisheries</option>
+                  <option value="textiles">Textiles</option>
+                </select>
+              </div>
+
+              <div class="form-group" style="grid-column:1/-1; border-top:1px solid var(--border); padding-top:12px; margin-top:4px;">
+                <span style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.07em; color:var(--text-3);">Supply chain exposure</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Supplier concentration <span class="req">*</span></label>
+                <select class="form-select" id="f-supplier">
+                  <option value="">Select…</option>
+                  <option value="1">1 supplier (all eggs in one basket)</option>
+                  <option value="2">2–3 suppliers</option>
+                  <option value="3">4–6 suppliers</option>
+                  <option value="4">7+ suppliers (well diversified)</option>
+                </select>
+                <span class="form-help">How many suppliers do you rely on for key inputs?</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Alternative transport route <span class="req">*</span></label>
+                <select class="form-select" id="f-transport">
+                  <option value="">Select…</option>
+                  <option value="1">No alternative route available</option>
+                  <option value="2">One alternative, rarely used</option>
+                  <option value="3">One alternative, tested and viable</option>
+                  <option value="4">Multiple alternatives identified</option>
+                </select>
+              </div>
+
+              <div class="form-group" style="grid-column:1/-1; border-top:1px solid var(--border); padding-top:12px; margin-top:4px;">
+                <span style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.07em; color:var(--text-3);">Financial resilience</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Cash reserve <span class="req">*</span></label>
+                <select class="form-select" id="f-cash">
+                  <option value="">Select…</option>
+                  <option value="1">Less than 1 week of operating costs</option>
+                  <option value="2">1–4 weeks</option>
+                  <option value="3">1–3 months</option>
+                  <option value="4">More than 3 months</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Business records backup <span class="req">*</span></label>
+                <select class="form-select" id="f-records">
+                  <option value="">Select…</option>
+                  <option value="1">No records kept</option>
+                  <option value="2">Paper only, no backup</option>
+                  <option value="3">Paper + digital, not backed up off-site</option>
+                  <option value="4">Digital records backed up off-site or cloud</option>
+                </select>
+              </div>
+
+              <div class="form-group" style="grid-column:1/-1; border-top:1px solid var(--border); padding-top:12px; margin-top:4px;">
+                <span style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.07em; color:var(--text-3);">Operational dependencies</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Water dependency <span class="req">*</span></label>
+                <select class="form-select" id="f-water">
+                  <option value="">Select…</option>
+                  <option value="1">Fully dependent on rain-fed / single water source</option>
+                  <option value="2">Mostly rain-fed, some alternative</option>
+                  <option value="3">Irrigated, single scheme</option>
+                  <option value="4">Multiple water sources or low water dependency</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Power / cold-chain dependency <span class="req">*</span></label>
+                <select class="form-select" id="f-power">
+                  <option value="">Select…</option>
+                  <option value="1">Fully dependent on grid power, no backup</option>
+                  <option value="2">Grid-dependent with generator backup</option>
+                  <option value="3">Solar or off-grid, limited storage</option>
+                  <option value="4">Not dependent on power / resilient setup</option>
+                </select>
+              </div>
+
+              <div class="form-group" style="grid-column:1/-1; border-top:1px solid var(--border); padding-top:12px; margin-top:4px;">
+                <span style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.07em; color:var(--text-3);">Preparedness</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Early warning access <span class="req">*</span></label>
+                <select class="form-select" id="f-ews">
+                  <option value="">Select…</option>
+                  <option value="1">No access to early warning information</option>
+                  <option value="2">Occasional access (radio, word of mouth)</option>
+                  <option value="3">Regular access to alerts (SMS, radio)</option>
+                  <option value="4">Real-time alerts + established response protocol</option>
+                </select>
+              </div>
+
+              <div class="form-group full" style="margin-top:8px; display:flex; gap:10px; align-items:center;">
+                <button class="btn-primary" onclick="runAssessment()">Calculate my risk score</button>
+                <button class="btn-secondary" onclick="resetForm()">Reset</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="section-title">How it works</div>
+          <div class="card">
+            <p style="font-size:13px; color:var(--text-2); line-height:1.7; margin-bottom:10px;">Your answers are mapped to a 0–100 vulnerability scale. Combined with regional baseline scores (climate, conflict, business vulnerability, preparedness), the tool calculates:</p>
+            <div style="font-size:12px; color:var(--text-2); line-height:1.8;">
+              <div style="padding:6px 0; border-bottom:1px solid var(--border);">① <strong>Equal-weight score</strong> — average of 4 risk dimensions</div>
+              <div style="padding:6px 0; border-bottom:1px solid var(--border);">② <strong>Sector-adjusted score</strong> — equal-weight × sector multiplier</div>
+              <div style="padding:6px 0;">③ <strong>Risk band</strong> + personalised action plan</div>
+            </div>
+            <div style="margin-top:14px; padding:10px; background:var(--surface2); border-radius:var(--r); font-size:12px; color:var(--text-2);">
+              <strong>Sector multipliers:</strong><br>
+              Agriculture ×1.2 · Livestock ×1.3<br>
+              Fisheries ×1.4 · Textiles ×1.1
+            </div>
+          </div>
+          <div class="card mt16">
+            <div class="card-title">Risk bands</div>
+            <div style="display:flex; flex-direction:column; gap:6px; margin-top:4px;">
+              <div style="display:flex; align-items:center; justify-content:space-between;"><span class="risk-band risk-low">Low</span><span style="font-size:12px; color:var(--text-2);">0–24</span></div>
+              <div style="display:flex; align-items:center; justify-content:space-between;"><span class="risk-band risk-moderate">Moderate</span><span style="font-size:12px; color:var(--text-2);">25–49</span></div>
+              <div style="display:flex; align-items:center; justify-content:space-between;"><span class="risk-band risk-high">High</span><span style="font-size:12px; color:var(--text-2);">50–74</span></div>
+              <div style="display:flex; align-items:center; justify-content:space-between;"><span class="risk-band risk-severe">Severe</span><span style="font-size:12px; color:var(--text-2);">75–100</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Result Panel -->
+      <div class="result-panel mt24" id="result-panel">
+        <div class="result-header">
+          <div>
+            <div style="font-size:12px; opacity:0.7; margin-bottom:4px;">Assessment result</div>
+            <div style="font-size:18px; font-weight:600;" id="result-title">Your business risk profile</div>
+          </div>
+          <div style="display:flex; gap:24px;">
+            <div style="text-align:center;">
+              <div style="font-size:11px; opacity:0.7; margin-bottom:4px;">Equal-weight score</div>
+              <div style="font-size:28px; font-weight:600; font-family:var(--mono);" id="result-ew-score">—</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-size:11px; opacity:0.7; margin-bottom:4px;">Sector-adjusted score</div>
+              <div style="font-size:28px; font-weight:600; font-family:var(--mono);" id="result-sa-score">—</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-size:11px; opacity:0.7; margin-bottom:4px;">Risk band</div>
+              <div style="margin-top:4px;" id="result-band-badge"></div>
+            </div>
+          </div>
+        </div>
+        <div class="result-body">
+          <div class="grid-2">
+            <div>
+              <div class="section-title">Main risk drivers</div>
+              <div id="result-drivers"></div>
+            </div>
+            <div>
+              <div class="section-title">Recommended preparedness actions</div>
+              <div id="result-actions"></div>
+            </div>
+          </div>
+          <div class="mt16" style="padding-top:14px; border-top:1px solid var(--border);">
+            <div class="section-title">Score breakdown</div>
+            <div id="result-breakdown"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         PAGE 6: METHODOLOGY
+    ════════════════════════════════════════ -->
+    <div class="page" id="page-methodology">
+      <div class="grid-2-1">
+        <div>
+          <div class="meth-section">
+            <h3>Overview</h3>
+            <p>This dashboard calculates composite disaster risk scores for Somali MSMEs across four sectors. Scores reflect exposure to climate shocks, conflict and access disruption, business vulnerability, and preparedness gaps — weighted equally by default, then adjusted by sector-specific sensitivity multipliers.</p>
+          </div>
+
+          <div class="meth-section">
+            <h3>Scoring formula</h3>
+            <div class="formula-box">Equal-Weight Score = (Climate Risk + Conflict &amp; Access + Business Vulnerability + Preparedness Gap) ÷ 4</div>
+            <div class="formula-box" style="margin-top:8px;">Sector-Adjusted Score = Equal-Weight Score × Sector Multiplier</div>
+            <div class="formula-box" style="margin-top:8px;">Final Score = MIN(Sector-Adjusted Score, 100)</div>
+            <p>Each input dimension is scored 0–100. The final sector-adjusted score is capped at 100.</p>
+          </div>
+
+          <div class="meth-section">
+            <h3>Risk dimensions</h3>
+            <p><strong>Climate Risk (0–100):</strong> Drought frequency and severity (based on SPI and NDVI anomaly data), flood exposure, cyclone exposure for coastal zones, and rainfall variability. Primary source: FSNAU agro-climatic monitoring; CHIRPS rainfall data.</p>
+            <p><strong>Conflict and Access Risk (0–100):</strong> Number of security incidents within 50km radius (ACLED), presence of armed group territorial control, checkpoint density on key trade routes, and humanitarian access constraints. Source: ACLED, OCHA Access Monitoring.</p>
+            <p><strong>Business Vulnerability (0–100):</strong> Composite of supplier concentration (single-source dependency), cash reserve adequacy, water and energy dependency, and lack of financial buffers. Source: World Bank Somalia MSME survey, UNDP private sector assessments.</p>
+            <p><strong>Preparedness Gap (0–100):</strong> Inverse of preparedness: early warning system coverage, business continuity planning, record backup, and access to insurance or credit recovery mechanisms. Source: FSNAU, UNDP Somalia, ILO Safer Work assessments.</p>
+          </div>
+
+          <div class="meth-section">
+            <h3>Sector sensitivity multipliers</h3>
+            <table class="data-table" style="margin-top:8px; border:1px solid var(--border); border-radius:var(--r); overflow:hidden;">
+              <thead><tr><th>Sector</th><th>Multiplier</th><th>Rationale</th></tr></thead>
+              <tbody>
+                <tr><td>Agriculture</td><td style="font-family:var(--mono);">×1.2</td><td style="font-size:12px; color:var(--text-2);">High drought/flood exposure; rain-fed dependency</td></tr>
+                <tr><td>Livestock</td><td style="font-family:var(--mono);">×1.3</td><td style="font-size:12px; color:var(--text-2);">Mobility-dependent; high conflict exposure on pastoral routes</td></tr>
+                <tr><td>Fisheries</td><td style="font-family:var(--mono);">×1.4</td><td style="font-size:12px; color:var(--text-2);">Coastal flood/cyclone risk + piracy + cold-chain dependency</td></tr>
+                <tr><td>Textiles</td><td style="font-family:var(--mono);">×1.1</td><td style="font-size:12px; color:var(--text-2);">Lower climate exposure; urban supply chains, conflict risk remains</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="meth-section">
+            <h3>Risk band thresholds</h3>
+            <table class="data-table" style="margin-top:8px; border:1px solid var(--border); border-radius:var(--r); overflow:hidden;">
+              <thead><tr><th>Band</th><th>Score range</th><th>Interpretation</th></tr></thead>
+              <tbody>
+                <tr><td><span class="risk-band risk-low">Low</span></td><td style="font-family:var(--mono);">0–24</td><td style="font-size:12px; color:var(--text-2);">Business well-positioned; maintain current practices</td></tr>
+                <tr><td><span class="risk-band risk-moderate">Moderate</span></td><td style="font-family:var(--mono);">25–49</td><td style="font-size:12px; color:var(--text-2);">Some vulnerabilities; targeted preparedness recommended</td></tr>
+                <tr><td><span class="risk-band risk-high">High</span></td><td style="font-family:var(--mono);">50–74</td><td style="font-size:12px; color:var(--text-2);">Significant exposure; structured preparedness plan urgent</td></tr>
+                <tr><td><span class="risk-band risk-severe">Severe</span></td><td style="font-family:var(--mono);">75–100</td><td style="font-size:12px; color:var(--text-2);">Critical vulnerability; immediate action and external support needed</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="meth-section">
+            <h3>Self-assessment scoring</h3>
+            <p>Each self-assessment question maps to a risk dimension. Answers are scored 1 (most vulnerable) to 4 (most resilient), then rescaled to 0–100: <code style="font-family:var(--mono); background:var(--surface2); padding:2px 6px; border-radius:3px;">score = (4 - answer) / 3 × 100</code>. This is blended with regional baseline scores (60% self-assessment, 40% regional baseline) for the final output.</p>
+          </div>
+        </div>
+        <div>
+          <div class="section-title">Data sources</div>
+          <div class="card">
+            <div class="ref-item">📊 <strong>FSNAU</strong> — Food Security and Nutrition Analysis Unit. Agro-climatic monitoring, IPC phase data, livelihood zone analysis. fsnau.org</div>
+            <div class="ref-item">⚔ <strong>ACLED</strong> — Armed Conflict Location and Event Data. Conflict incidents, displacement, access restrictions. acleddata.com</div>
+            <div class="ref-item">🌍 <strong>UN OCHA Somalia</strong> — Humanitarian access monitoring, situation reports, corridor assessments. unocha.org/somalia</div>
+            <div class="ref-item">🌦 <strong>CHIRPS</strong> — Climate Hazards Group InfraRed Precipitation with Station data (UC Santa Barbara). Rainfall anomaly baseline.</div>
+            <div class="ref-item">🏦 <strong>World Bank Somalia</strong> — MSME survey data, financial inclusion, private sector assessments.</div>
+            <div class="ref-item">🤝 <strong>UNDP Somalia</strong> — Private sector resilience assessments, disaster preparedness frameworks.</div>
+            <div class="ref-item">📋 <strong>ILO Safer Work</strong> — Business continuity and occupational resilience data for informal sector.</div>
+          </div>
+
+          <div class="section-title mt24">Limitations</div>
+          <div class="card">
+            <p style="font-size:13px; color:var(--text-2); line-height:1.7; margin-bottom:8px;">Regional scores are based on area-level data and may not reflect hyperlocal conditions. Conflict indicators can change rapidly. Self-assessment scores depend on self-reported answers.</p>
+            <p style="font-size:13px; color:var(--text-2); line-height:1.7;">This tool is intended to support decision-making, not replace on-the-ground expert assessment. For high-stakes decisions, consult OCHA, FSNAU, or a local humanitarian partner.</p>
+          </div>
+
+          <div class="section-title mt24">Version</div>
+          <div class="card">
+            <div style="font-size:13px; color:var(--text-2);">
+              <div style="padding:6px 0; border-bottom:1px solid var(--border);">Version 1.0 · June 2025</div>
+              <div style="padding:6px 0; border-bottom:1px solid var(--border);">Sectors: Agriculture, Livestock, Fisheries, Textiles</div>
+              <div style="padding:6px 0;">Regions: All 18 Federal Member State regions</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+</div><!-- /main -->
+
+<script>
+// ══════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════
+
+const REGIONS = [
+  { name: "Bay",            climate: 85, conflict: 80, vuln: 78, prep: 82 },
+  { name: "Bakool",         climate: 82, conflict: 82, vuln: 75, prep: 80 },
+  { name: "Lower Shabelle", climate: 70, conflict: 78, vuln: 72, prep: 75 },
+  { name: "Middle Juba",    climate: 75, conflict: 80, vuln: 70, prep: 78 },
+  { name: "Hiraan",         climate: 72, conflict: 72, vuln: 68, prep: 70 },
+  { name: "Gedo",           climate: 78, conflict: 70, vuln: 65, prep: 72 },
+  { name: "Lower Juba",     climate: 60, conflict: 65, vuln: 62, prep: 68 },
+  { name: "Galgaduud",      climate: 68, conflict: 62, vuln: 60, prep: 65 },
+  { name: "Middle Shabelle",climate: 62, conflict: 58, vuln: 58, prep: 60 },
+  { name: "Benadir",        climate: 40, conflict: 52, vuln: 55, prep: 45 },
+  { name: "Mudug",          climate: 65, conflict: 55, vuln: 55, prep: 60 },
+  { name: "Nugaal",         climate: 55, conflict: 42, vuln: 48, prep: 50 },
+  { name: "Bari",           climate: 45, conflict: 35, vuln: 45, prep: 42 },
+  { name: "Sool",           climate: 58, conflict: 50, vuln: 52, prep: 55 },
+  { name: "Sanaag",         climate: 50, conflict: 40, vuln: 45, prep: 48 },
+  { name: "Togdheer",       climate: 48, conflict: 35, vuln: 42, prep: 45 },
+  { name: "Woqooyi Galbeed",climate: 35, conflict: 28, vuln: 38, prep: 35 },
+  { name: "Awdal",          climate: 32, conflict: 22, vuln: 35, prep: 30 },
+];
+
+const MULTIPLIERS = { agriculture: 1.2, livestock: 1.3, fisheries: 1.4, textiles: 1.1 };
+
+function ewScore(r) {
+  return Math.round((r.climate + r.conflict + r.vuln + r.prep) / 4);
+}
+function saScore(r, sector) {
+  return Math.min(100, Math.round(ewScore(r) * MULTIPLIERS[sector]));
+}
+function band(score) {
+  if (score < 25) return { label: "Low", cls: "risk-low" };
+  if (score < 50) return { label: "Moderate", cls: "risk-moderate" };
+  if (score < 75) return { label: "High", cls: "risk-high" };
+  return { label: "Severe", cls: "risk-severe" };
+}
+function bandColor(score) {
+  if (score < 25) return "var(--low)";
+  if (score < 50) return "var(--mod)";
+  if (score < 75) return "var(--high)";
+  return "var(--severe)";
+}
+
+const SECTOR_PROFILES = {
+  agriculture: {
+    icon: "🌾",
+    desc: "Agriculture is Somalia's largest livelihood sector, employing ~65% of the population. It is highly exposed to rain variability (bimodal Gu/Deyr rains), drought, and flood damage. Conflict disrupts farming in Bay, Bakool, and the Shabelles.",
+    drivers: ["Rain-fed dependency (Gu/Deyr failure)", "Drought-induced crop loss", "Conflict: farming disruption in Bay/Bakool", "Limited input supply chains"],
+    avgEW: 0, avgSA: 0
+  },
+  livestock: {
+    icon: "🐄",
+    desc: "Livestock (camels, cattle, goats, sheep) accounts for ~40% of Somalia's GDP and ~80% of export earnings. Pastoral mobility routes are frequently disrupted by Al-Shabaab checkpoints and drought-driven range degradation.",
+    drivers: ["Conflict-blocked pastoral migration routes", "Drought: water/pasture failure", "Disease outbreak risk (HPAI, FMD)", "Export market disruption via Berbera/Mogadishu ports"],
+    avgEW: 0, avgSA: 0
+  },
+  fisheries: {
+    icon: "🐟",
+    desc: "Somalia has the longest coastline in Africa (3,333 km). Artisanal fisheries are a critical livelihood for coastal communities. Cold-chain infrastructure is minimal; piracy risk and cyclone exposure (especially north Indian Ocean) add to vulnerability.",
+    drivers: ["Cold-chain and power infrastructure gaps", "Cyclone / storm surge (north Indian Ocean)", "Piracy risk on coastal routes", "Lack of market linkages / ice supply"],
+    avgEW: 0, avgSA: 0
+  },
+  textiles: {
+    icon: "🧵",
+    desc: "Textiles and garments are a growing urban sector, centered in Mogadishu and Hargeisa. Urban supply chains provide some resilience vs. rural sectors, but conflict risk, import dependency for raw materials, and power unreliability remain key constraints.",
+    drivers: ["Import dependency for yarn/fabric", "Urban conflict risk (Mogadishu)", "Unreliable electricity / generator costs", "Informal credit access limits"],
+    avgEW: 0, avgSA: 0
+  }
+};
+
+// Precompute averages
+Object.keys(SECTOR_PROFILES).forEach(s => {
+  const ews = REGIONS.map(r => ewScore(r));
+  const sas = REGIONS.map(r => saScore(r, s));
+  SECTOR_PROFILES[s].avgEW = Math.round(ews.reduce((a,b)=>a+b,0)/ews.length);
+  SECTOR_PROFILES[s].avgSA = Math.round(sas.reduce((a,b)=>a+b,0)/sas.length);
+});
+
+const CORRIDORS = [
+  {
+    name: "Mogadishu–Baidoa Corridor",
+    type: "Road", distance: "285 km",
+    conflict: 82, flood: 45, chokepoint: 70,
+    sectors: ["Agriculture","Livestock","Textiles"],
+    points: ["Mogadishu (Benadir)","Afgooye","Wanlaweyn","Qoryooley","Baidoa (Bay)"],
+    notes: "Most critical land route connecting Mogadishu port with Bay/Bakool hinterland. Heavily contested by Al-Shabaab. Multiple checkpoints reported (ACLED 2024). Prone to flooding at Afgooye–Marka junction during Deyr rains.",
+    status: "severe"
+  },
+  {
+    name: "Kismayo–Mogadishu Coastal Road",
+    type: "Road / Coastal", distance: "520 km",
+    conflict: 70, flood: 60, chokepoint: 55,
+    sectors: ["Fisheries","Agriculture","Livestock"],
+    points: ["Kismayo (Lower Juba)","Jilib","Bu'aale","Marka","Mogadishu"],
+    notes: "Southern coastal corridor critical for fish transport and southern agricultural produce. Al-Shabaab presence in Middle/Lower Juba. Coastal flooding risk near Kismayo during Indian Ocean cyclone season.",
+    status: "high"
+  },
+  {
+    name: "Berbera–Hargeisa–Togdheer",
+    type: "Road", distance: "165 km",
+    conflict: 18, flood: 22, chokepoint: 20,
+    sectors: ["Livestock","Textiles","Agriculture"],
+    points: ["Berbera Port (Woqooyi Galbeed)","Hargeisa","Sheikh Pass","Burao (Togdheer)"],
+    notes: "Somaliland's main trade artery. Relatively stable. Berbera port expansion (DP World) has increased throughput. Sheikh mountain pass can be disrupted by heavy rains. Livestock export route to Gulf.",
+    status: "low"
+  },
+  {
+    name: "Garowe–Bosaso Corridor",
+    type: "Road", distance: "210 km",
+    conflict: 30, flood: 25, chokepoint: 35,
+    sectors: ["Livestock","Fisheries","Textiles"],
+    points: ["Garowe (Nugaal)","Iskushuban","Qandala","Bosaso (Bari)"],
+    notes: "Puntland's main economic corridor linking the Gulf of Aden port of Bosaso to the interior. Moderate piracy risk in Gulf of Aden approaches. Qandala area had historical Al-Shabaab incursion (2016). Road quality limits speed.",
+    status: "moderate"
+  },
+  {
+    name: "Dhusamareb–Galkayo Corridor",
+    type: "Road", distance: "190 km",
+    conflict: 60, flood: 38, chokepoint: 45,
+    sectors: ["Agriculture","Livestock"],
+    points: ["Dhusamareb (Galgaduud)","Abduwaq","Galkayo (Mudug)"],
+    notes: "Connects Galmudug's administrative capital to the Mudug commercial hub. Moderate conflict risk from clan dynamics and Al-Shabaab activity in lower Galgaduud. Important for livestock movement from central regions.",
+    status: "high"
+  },
+  {
+    name: "Beled Hawo–Mandera–Mogadishu",
+    type: "Road", distance: "890 km",
+    conflict: 75, flood: 50, chokepoint: 65,
+    sectors: ["Agriculture","Livestock","Textiles"],
+    points: ["Beled Hawo (Gedo)","Luuq","Baidoa","Mogadishu"],
+    notes: "Long southern corridor originating at the Kenya–Ethiopia–Somalia tri-border. High conflict risk throughout Gedo and Bay regions. Cross-border trade in livestock and agricultural goods. Multiple humanitarian access disruptions reported 2024.",
+    status: "severe"
+  },
+  {
+    name: "Mogadishu Port — Import Distribution",
+    type: "Sea + Road", distance: "Hub",
+    conflict: 48, flood: 30, chokepoint: 60,
+    sectors: ["Textiles","Agriculture","Livestock","Fisheries"],
+    points: ["Mogadishu Port","Bakaara Market","Eastleigh corridor","Afgooye bypass"],
+    notes: "Somalia's main import gateway handling ~90% of commercial imports. Port operations occasionally disrupted by security incidents. Last-mile distribution through contested urban fringe areas. Critical chokepoint for textiles raw material imports.",
+    status: "high"
+  },
+  {
+    name: "Hobyo–El Bur Pastoral Corridor",
+    type: "Seasonal track", distance: "320 km",
+    conflict: 62, flood: 42, chokepoint: 50,
+    sectors: ["Livestock"],
+    points: ["Hobyo coast (Mudug)","Harardheere","El Bur (Galgaduud)","Dhusamareb"],
+    notes: "Seasonal pastoral migration route for central Somalia livestock herders moving cattle and camels toward coastal markets. Piracy legacy limits use of Hobyo port. Conflict incidents in Harardheere corridor documented.",
+    status: "high"
+  },
+  {
+    name: "Kismayo Port — Fish Export Chain",
+    type: "Sea + Road", distance: "Hub",
+    conflict: 65, flood: 58, chokepoint: 48,
+    sectors: ["Fisheries"],
+    points: ["Kismayo Port (Lower Juba)","Jubba cold storage","Kismayo market","Northern distributor road"],
+    notes: "Key fisheries export point. Al-Shabaab presence in surrounding districts limits supply chain security. Minimal cold-chain infrastructure — most fish traded fresh within 24 hours. Port upgrades underway as of 2024.",
+    status: "high"
+  },
+  {
+    name: "Jowhar–Beledweyne Agricultural Belt",
+    type: "Road + River", distance: "240 km",
+    conflict: 58, flood: 72, chokepoint: 45,
+    sectors: ["Agriculture","Livestock"],
+    points: ["Jowhar (Middle Shabelle)","Mahadaay","Beledweyne (Hiraan)"],
+    notes: "Follows the Shabelle River valley — Somalia's main irrigated agricultural zone. High flood risk along river (Shabelle floods recorded 2023, 2024). Al-Shabaab activity in rural Hiraan. Critical for rice and sorghum production.",
+    status: "high"
+  },
+  {
+    name: "Hargeisa–Borama Corridor",
+    type: "Road", distance: "120 km",
+    conflict: 15, flood: 18, chokepoint: 15,
+    sectors: ["Agriculture","Textiles","Livestock"],
+    points: ["Hargeisa (Woqooyi Galbeed)","Gabiley","Borama (Awdal)","Djibouti border"],
+    notes: "Somaliland's western corridor toward Djibouti and the Awdal farming belt. Highly stable. Important for agricultural imports from Ethiopia. Relatively good road infrastructure. Cross-border trade in food and textiles.",
+    status: "low"
+  },
+  {
+    name: "El Wak–Dolow Cross-Border (Kenya)",
+    type: "Road", distance: "185 km",
+    conflict: 68, flood: 45, chokepoint: 55,
+    sectors: ["Livestock","Agriculture"],
+    points: ["El Wak (Gedo)","Dolow","Luuq","Ethiopian border"],
+    notes: "Cross-border pastoral and humanitarian corridor in Gedo region, adjacent to Dadaab refugee complex. Heavy Al-Shabaab influence. Critical for livestock movement to Kenya and Ethiopia markets. Frequent OCHA access disruption reports.",
+    status: "high"
+  }
+];
+
+function corridorScore(c) {
+  return Math.round((c.conflict + c.flood + c.chokepoint) / 3);
+}
+
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+
+const PAGE_TITLES = {
+  home: ["Home", "Somalia MSME Disaster Preparedness Platform"],
+  national: ["National Risk Dashboard", "All 18 regions · Composite risk scores"],
+  sector: ["Sector Risk Explorer", "Agriculture · Livestock · Fisheries · Textiles"],
+  corridor: ["Corridor & Supply Route Risk", "12 key trade corridors assessed"],
+  assessment: ["MSME Self-Assessment", "Calculate your business risk score"],
+  methodology: ["Methodology", "Scoring logic, data sources, and limitations"]
+};
+
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelector('[data-page="' + page + '"]').classList.add('active');
+  const t = PAGE_TITLES[page];
+  document.getElementById('topbar-title').textContent = t[0];
+  document.getElementById('topbar-sub').textContent = t[1];
+  window.scrollTo(0, 0);
+}
+
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => navigate(item.dataset.page));
+});
+
+// ══════════════════════════════════════════
+// NATIONAL TABLE
+// ══════════════════════════════════════════
+
+function scoreBarColor(score) {
+  if (score < 25) return "var(--low)";
+  if (score < 50) return "var(--mod)";
+  if (score < 75) return "var(--high)";
+  return "var(--severe)";
+}
+
+function renderNational() {
+  const sorted = [...REGIONS].sort((a,b) => ewScore(b) - ewScore(a));
+  const tbody = document.getElementById('national-table-body');
+  tbody.innerHTML = sorted.map(r => {
+    const ew = ewScore(r);
+    const b = band(ew);
+    const col = scoreBarColor(ew);
+    return `<tr>
+      <td><span class="region-name">${r.name}</span></td>
+      <td>
+        <div class="score-bar-wrap">
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:${r.climate}%; background:var(--high);"></div></div>
+          <span class="score-num">${r.climate}</span>
+        </div>
+      </td>
+      <td>
+        <div class="score-bar-wrap">
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:${r.conflict}%; background:var(--severe);"></div></div>
+          <span class="score-num">${r.conflict}</span>
+        </div>
+      </td>
+      <td>
+        <div class="score-bar-wrap">
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:${r.vuln}%; background:var(--mod);"></div></div>
+          <span class="score-num">${r.vuln}</span>
+        </div>
+      </td>
+      <td>
+        <div class="score-bar-wrap">
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:${r.prep}%; background:var(--accent);"></div></div>
+          <span class="score-num">${r.prep}</span>
+        </div>
+      </td>
+      <td>
+        <div class="score-bar-wrap">
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:${ew}%; background:${col};"></div></div>
+          <span class="score-num" style="font-weight:600; color:${col};">${ew}</span>
+        </div>
+      </td>
+      <td><span class="risk-band ${b.cls}">${b.label}</span></td>
+    </tr>`;
+  }).join('');
+
+  // Distribution
+  const dist = document.getElementById('national-dist-bars');
+  const counts = [0,0,0,0]; // low mod high severe
+  REGIONS.forEach(r => {
+    const s = ewScore(r);
+    if (s < 25) counts[0]++;
+    else if (s < 50) counts[1]++;
+    else if (s < 75) counts[2]++;
+    else counts[3]++;
+  });
+  const colors = ['var(--low)','var(--mod)','var(--high)','var(--severe)'];
+  const labels = ['Low','Moderate','High','Severe'];
+  dist.innerHTML = counts.map((c,i) => `
+    <div class="prog-row">
+      <div class="prog-label">${labels[i]}</div>
+      <div class="prog-bg"><div class="prog-fill" style="width:${c/18*100}%; background:${colors[i]};"></div></div>
+      <div class="prog-val">${c} regions</div>
+    </div>
+  `).join('');
+
+  // Top 5
+  const top5 = document.getElementById('top5-regions');
+  top5.innerHTML = sorted.slice(0,5).map((r,i) => {
+    const ew = ewScore(r);
+    const b = band(ew);
+    return `<div class="prog-row">
+      <div class="prog-label" style="font-weight:500;">${i+1}. ${r.name}</div>
+      <div class="prog-bg"><div class="prog-fill" style="width:${ew}%; background:${scoreBarColor(ew)};"></div></div>
+      <div class="prog-val" style="color:${scoreBarColor(ew)};">${ew}</div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+// SECTOR EXPLORER
+// ══════════════════════════════════════════
+
+let currentSector = 'agriculture';
+
+function renderSectorSummary() {
+  const container = document.getElementById('sector-summary-cards');
+  container.innerHTML = Object.entries(SECTOR_PROFILES).map(([k,v]) => {
+    const b = band(v.avgSA);
+    return `<div class="card" style="cursor:pointer; border:1.5px solid ${currentSector===k?'var(--accent)':'var(--border)'}; " onclick="switchSector('${k}')">
+      <div class="card-title">${v.icon} ${k.charAt(0).toUpperCase()+k.slice(1)}</div>
+      <div class="card-value" style="color:${scoreBarColor(v.avgSA)};">${v.avgSA}</div>
+      <div class="card-sub">×${MULTIPLIERS[k]} · <span class="risk-band ${b.cls}">${b.label}</span></div>
+    </div>`;
+  }).join('');
+}
+
+function renderSectorDetail(sector) {
+  const sorted = [...REGIONS].sort((a,b) => saScore(b,sector) - saScore(a,sector));
+  document.getElementById('sector-detail-title').textContent = sector.charAt(0).toUpperCase()+sector.slice(1) + ' — Regional Risk Scores';
+
+  const tbody = document.getElementById('sector-table-body');
+  tbody.innerHTML = sorted.map(r => {
+    const ew = ewScore(r);
+    const sa = saScore(r, sector);
+    const b = band(sa);
+    // Determine key driver
+    const dims = [['Climate', r.climate], ['Conflict', r.conflict], ['Vulnerability', r.vuln], ['Preparedness', r.prep]];
+    const top = dims.sort((a,b)=>b[1]-a[1])[0];
+    return `<tr>
+      <td><span class="region-name">${r.name}</span></td>
+      <td><span style="font-family:var(--mono); font-weight:500;">${ew}</span></td>
+      <td>
+        <div class="score-bar-wrap">
+          <div class="score-bar-bg"><div class="score-bar-fill" style="width:${sa}%; background:${scoreBarColor(sa)};"></div></div>
+          <span class="score-num" style="color:${scoreBarColor(sa)}; font-weight:600;">${sa}</span>
+        </div>
+      </td>
+      <td><span class="risk-band ${b.cls}">${b.label}</span></td>
+      <td style="font-size:12px; color:var(--text-3);">${top[0]}: ${top[1]}</td>
+    </tr>`;
+  }).join('');
+
+  // Profile
+  const prof = SECTOR_PROFILES[sector];
+  document.getElementById('sector-profile-content').innerHTML = `
+    <div class="card-title">${prof.icon} ${sector.charAt(0).toUpperCase()+sector.slice(1)} overview</div>
+    <p style="font-size:13px; color:var(--text-2); line-height:1.6; margin-bottom:12px;">${prof.desc}</p>
+    <div style="display:flex; gap:16px; margin-top:8px;">
+      <div style="text-align:center; flex:1; padding:10px; background:var(--surface2); border-radius:var(--r);">
+        <div style="font-size:11px; color:var(--text-3);">Avg. equal-weight</div>
+        <div style="font-size:22px; font-weight:600; font-family:var(--mono); color:${scoreBarColor(prof.avgEW)};">${prof.avgEW}</div>
+      </div>
+      <div style="text-align:center; flex:1; padding:10px; background:var(--surface2); border-radius:var(--r);">
+        <div style="font-size:11px; color:var(--text-3);">Avg. sector-adjusted</div>
+        <div style="font-size:22px; font-weight:600; font-family:var(--mono); color:${scoreBarColor(prof.avgSA)};">${prof.avgSA}</div>
+      </div>
+    </div>`;
+
+  // Risk factors
+  const rf = document.getElementById('sector-risk-factors');
+  rf.innerHTML = prof.drivers.map(d => `
+    <div class="driver-item">
+      <div class="driver-dot" style="background:${scoreBarColor(65)};"></div>
+      <div style="font-size:13px; color:var(--text-2);">${d}</div>
+    </div>`).join('');
+}
+
+function switchSector(s) {
+  currentSector = s;
+  document.querySelectorAll('.sector-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.sector === s);
+  });
+  renderSectorSummary();
+  renderSectorDetail(s);
+}
+
+document.querySelectorAll('.sector-tab').forEach(tab => {
+  tab.addEventListener('click', () => switchSector(tab.dataset.sector));
+});
+
+// ══════════════════════════════════════════
+// CORRIDORS
+// ══════════════════════════════════════════
+
+function renderCorridors() {
+  const list = document.getElementById('corridor-list');
+  const sorted = [...CORRIDORS].sort((a,b) => corridorScore(b) - corridorScore(a));
+  list.innerHTML = sorted.map((c, i) => {
+    const score = corridorScore(c);
+    const b = band(score);
+    const col = scoreBarColor(score);
+    return `
+    <div class="corridor-card">
+      <div class="corridor-header" onclick="toggleCorridor(${i})">
+        <div class="corridor-title">
+          <span class="risk-band ${b.cls}">${b.label}</span>
+          ${c.name}
+          <span style="font-size:11px; color:var(--text-3); font-weight:400;">${c.type} · ${c.distance}</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:16px;">
+          <div style="font-size:12px; color:var(--text-3);">Sectors: ${c.sectors.join(' · ')}</div>
+          <div style="font-family:var(--mono); font-size:16px; font-weight:600; color:${col};">${score}</div>
+          <span style="color:var(--text-3);" id="caret-${i}">▼</span>
+        </div>
+      </div>
+      <div class="corridor-body" id="cbody-${i}" style="display:none;">
+        <div class="grid-2">
+          <div>
+            <div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--text-3); margin-bottom:8px;">Route</div>
+            ${c.points.map((p, pi) => `
+              <div class="route-point">
+                ${pi > 0 ? '<span class="route-arrow">↓</span>' : '<span style="width:12px; display:inline-block;"></span>'}
+                ${p}
+              </div>`).join('')}
+          </div>
+          <div>
+            <div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--text-3); margin-bottom:8px;">Risk breakdown</div>
+            <div class="prog-row">
+              <div class="prog-label">Conflict / access</div>
+              <div class="prog-bg"><div class="prog-fill" style="width:${c.conflict}%; background:var(--severe);"></div></div>
+              <div class="prog-val">${c.conflict}</div>
+            </div>
+            <div class="prog-row">
+              <div class="prog-label">Flood exposure</div>
+              <div class="prog-bg"><div class="prog-fill" style="width:${c.flood}%; background:var(--high);"></div></div>
+              <div class="prog-val">${c.flood}</div>
+            </div>
+            <div class="prog-row">
+              <div class="prog-label">Chokepoint risk</div>
+              <div class="prog-bg"><div class="prog-fill" style="width:${c.chokepoint}%; background:var(--mod);"></div></div>
+              <div class="prog-val">${c.chokepoint}</div>
+            </div>
+            <div class="prog-row" style="margin-top:4px; padding-top:8px; border-top:1px solid var(--border);">
+              <div class="prog-label" style="font-weight:600;">Composite score</div>
+              <div class="prog-bg"><div class="prog-fill" style="width:${score}%; background:${col};"></div></div>
+              <div class="prog-val" style="font-weight:600; color:${col};">${score}</div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:12px; padding:10px 12px; background:var(--surface2); border-radius:var(--r); font-size:12px; color:var(--text-2); line-height:1.6;">
+          ${c.notes}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleCorridor(i) {
+  const body = document.getElementById('cbody-' + i);
+  const caret = document.getElementById('caret-' + i);
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'block';
+  caret.textContent = open ? '▼' : '▲';
+}
+
+// ══════════════════════════════════════════
+// SELF-ASSESSMENT
+// ══════════════════════════════════════════
+
+const ACTIONS = {
+  supplier: {
+    label: "Supplier concentration",
+    actions: [
+      "Identify and onboard at least 2 backup suppliers before next season.",
+      "Maintain a contacts list of alternative suppliers in neighbouring districts.",
+      "Negotiate pre-agreements with secondary suppliers for priority access during crises."
+    ]
+  },
+  transport: {
+    label: "Transport route access",
+    actions: [
+      "Map at least one alternative route for your main supply/market corridor.",
+      "Join a business association that shares real-time road condition alerts.",
+      "Pre-arrange agreements with alternative transporters in your region."
+    ]
+  },
+  cash: {
+    label: "Cash reserve",
+    actions: [
+      "Build a cash buffer equivalent to at least 4 weeks of operating costs.",
+      "Open a mobile money account (Hormuud/EVC Plus) for emergency transfers.",
+      "Explore Village Savings and Loan Associations (VSLAs) as a buffer mechanism."
+    ]
+  },
+  records: {
+    label: "Business records",
+    actions: [
+      "Photograph or scan key business documents and store on a mobile device.",
+      "Keep a secondary copy of records with a trusted family member in another location.",
+      "Use a simple spreadsheet or bookkeeping app to record transactions."
+    ]
+  },
+  water: {
+    label: "Water dependency",
+    actions: [
+      "Identify a secondary water source (borehole, water trucking contact) before drought onset.",
+      "Invest in water storage (tanks, hafirs) to buffer against access disruptions.",
+      "Engage with local water committees on emergency priority access agreements."
+    ]
+  },
+  power: {
+    label: "Power/cold-chain dependency",
+    actions: [
+      "Explore solar-powered alternatives to reduce grid and fuel dependency.",
+      "Identify a generator rental contact for emergency cold-chain continuation.",
+      "Reduce cold-chain dependency by improving market timing and drying/salting techniques."
+    ]
+  },
+  ews: {
+    label: "Early warning access",
+    actions: [
+      "Register for FSNAU SMS early warning alerts (fsnau.org).",
+      "Tune to BBC Somali or Radio Ergo for weather and security updates.",
+      "Develop a written business continuity plan with triggers and response steps."
+    ]
+  }
+};
+
+function runAssessment() {
+  const region = document.getElementById('f-region').value;
+  const sector = document.getElementById('f-sector').value;
+  if (!region || !sector) { alert('Please select a region and sector before continuing.'); return; }
+
+  const fields = {
+    supplier: +document.getElementById('f-supplier').value || 1,
+    transport: +document.getElementById('f-transport').value || 1,
+    cash: +document.getElementById('f-cash').value || 1,
+    records: +document.getElementById('f-records').value || 1,
+    water: +document.getElementById('f-water').value || 1,
+    power: +document.getElementById('f-power').value || 1,
+    ews: +document.getElementById('f-ews').value || 1
+  };
+
+  // Map answer 1-4 to vulnerability score 0-100
+  function toVuln(ans) { return Math.round((4 - ans) / 3 * 100); }
+
+  const selfVulnScores = Object.fromEntries(
+    Object.entries(fields).map(([k,v]) => [k, toVuln(v)])
+  );
+
+  // Get regional baseline
+  const regionData = REGIONS.find(r => r.name === region) ||
+    { climate: 60, conflict: 60, vuln: 60, prep: 60 };
+
+  // Blend self-assessment with regional baseline (60/40)
+  const businessVuln = Math.round(
+    (selfVulnScores.supplier + selfVulnScores.cash + selfVulnScores.water + selfVulnScores.power) / 4
+  );
+  const prepGap = Math.round(
+    (selfVulnScores.ews + selfVulnScores.records + selfVulnScores.transport) / 3
+  );
+
+  const blendedVuln = Math.round(0.6 * businessVuln + 0.4 * regionData.vuln);
+  const blendedPrep = Math.round(0.6 * prepGap + 0.4 * regionData.prep);
+
+  const ewRaw = (regionData.climate + regionData.conflict + blendedVuln + blendedPrep) / 4;
+  const ew = Math.round(ewRaw);
+  const sa = Math.min(100, Math.round(ew * MULTIPLIERS[sector]));
+  const b = band(sa);
+
+  // Identify top drivers
+  const dimScores = [
+    { name: "Climate Risk", score: regionData.climate, key: null },
+    { name: "Conflict & Access", score: regionData.conflict, key: null },
+    { name: "Business Vulnerability", score: blendedVuln, key: "supplier" },
+    { name: "Preparedness Gap", score: blendedPrep, key: "ews" }
+  ];
+
+  // Also individual self-assessment
+  const selfDims = Object.entries(selfVulnScores).map(([k,v]) => ({ name: ACTIONS[k].label, score: v, key: k }));
+
+  const allDrivers = [...dimScores, ...selfDims].sort((a,b) => b.score - a.score).slice(0,4);
+
+  // Build result
+  document.getElementById('result-title').textContent = region + ' — ' + sector.charAt(0).toUpperCase() + sector.slice(1);
+  document.getElementById('result-ew-score').textContent = ew;
+  document.getElementById('result-sa-score').textContent = sa;
+  document.getElementById('result-band-badge').innerHTML = `<span class="risk-band ${b.cls}" style="font-size:14px; padding:6px 14px;">${b.label}</span>`;
+
+  // Drivers
+  const driverColors = ['var(--severe)','var(--high)','var(--mod)','var(--low)'];
+  document.getElementById('result-drivers').innerHTML = allDrivers.map((d,i) => `
+    <div class="driver-item">
+      <div class="driver-dot" style="background:${driverColors[i]};"></div>
+      <div>
+        <div style="font-size:13px; font-weight:500;">${d.name}</div>
+        <div style="font-size:12px; color:var(--text-3);">Score: ${d.score} · ${band(d.score).label}</div>
+      </div>
+    </div>
+  `).join('');
+
+  // Actions — pick top 3 most vulnerable self-assessed dimensions
+  const topActionKeys = selfDims.sort((a,b) => b.score - a.score).slice(0,3).map(d => d.key);
+  let actionHtml = '';
+  let num = 1;
+  topActionKeys.forEach(k => {
+    if (ACTIONS[k]) {
+      ACTIONS[k].actions.forEach(a => {
+        actionHtml += `<div class="action-item"><div class="action-num">${num++}</div><div>${a}</div></div>`;
+      });
+    }
+  });
+  document.getElementById('result-actions').innerHTML = actionHtml || '<p style="font-size:13px;color:var(--text-3);">Complete all fields for personalised actions.</p>';
+
+  // Breakdown
+  document.getElementById('result-breakdown').innerHTML = `
+    <div class="grid-4">
+      ${[
+        ['Climate Risk', regionData.climate, '(regional baseline)'],
+        ['Conflict & Access', regionData.conflict, '(regional baseline)'],
+        ['Business Vulnerability', blendedVuln, '(blended self + regional)'],
+        ['Preparedness Gap', blendedPrep, '(blended self + regional)']
+      ].map(([label, score, note]) => `
+        <div style="padding:12px; background:var(--surface2); border-radius:var(--r); border:1px solid var(--border);">
+          <div style="font-size:11px; color:var(--text-3); margin-bottom:4px;">${label}</div>
+          <div style="font-size:22px; font-weight:600; font-family:var(--mono); color:${scoreBarColor(score)};">${score}</div>
+          <div style="font-size:11px; color:var(--text-3); margin-top:2px;">${note}</div>
+        </div>`).join('')}
+    </div>
+    <div style="margin-top:12px; padding:10px 14px; background:var(--accent-light); border-radius:var(--r); font-size:13px; color:var(--accent);">
+      <strong>Equal-weight score:</strong> (${regionData.climate} + ${regionData.conflict} + ${blendedVuln} + ${blendedPrep}) ÷ 4 = <strong>${ew}</strong> &nbsp;|&nbsp;
+      <strong>Sector-adjusted:</strong> ${ew} × ${MULTIPLIERS[sector]} = <strong>${sa}</strong> (capped at 100) &nbsp;|&nbsp;
+      <strong>Band:</strong> <span class="risk-band ${b.cls}">${b.label}</span>
+    </div>
+  `;
+
+  const panel = document.getElementById('result-panel');
+  panel.classList.add('visible');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function resetForm() {
+  ['f-region','f-sector','f-supplier','f-transport','f-cash','f-records','f-water','f-power','f-ews']
+    .forEach(id => document.getElementById(id).value = '');
+  document.getElementById('result-panel').classList.remove('visible');
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+
+renderNational();
+renderSectorSummary();
+renderSectorDetail('agriculture');
+renderCorridors();
+</script>
+</body>
+</html>
